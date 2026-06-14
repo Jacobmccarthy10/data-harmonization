@@ -11,14 +11,20 @@ interface Props {
   coverage: CoverageResponse;
   analysisId: string;
   onRestart: () => void;
+  onOpenMappingGraph: () => void;
 }
 
-export default function Step5Dashboard({ coverage, analysisId, onRestart }: Props) {
+export default function Step5Dashboard({
+  coverage,
+  analysisId,
+  onRestart,
+  onOpenMappingGraph,
+}: Props) {
   if (coverage.blocked) {
     return (
       <>
         <div className="banner red">
-          <strong>Coverage run blocked or limited — required fields missing</strong>
+          <strong>Coverage run blocked or limited because required fields are missing</strong>
           <ul className="tight">
             {coverage.blocked_reasons.map((r) => (
               <li key={r}>{r}</li>
@@ -26,6 +32,9 @@ export default function Step5Dashboard({ coverage, analysisId, onRestart }: Prop
           </ul>
         </div>
         <div className="btn-row">
+          <button className="btn" onClick={onOpenMappingGraph}>
+            Open Mapping Graph
+          </button>
           <button className="btn secondary" onClick={onRestart}>
             Start over with a different file
           </button>
@@ -41,25 +50,38 @@ export default function Step5Dashboard({ coverage, analysisId, onRestart }: Prop
     <>
       <ComparisonModeBanner mode={summary.comparison_mode} />
 
+      <div className="card mapping-graph-cta">
+        <div>
+          <h2>Coverage mapping graph</h2>
+          <p className="sub">
+            Explore how the client structure, NIQ fields, rules, confidence, and coverage
+            exceptions connect after the Discover comparison has run.
+          </p>
+        </div>
+        <button className="btn" onClick={onOpenMappingGraph}>
+          Open Mapping Graph
+        </button>
+      </div>
+
       <div className="card" style={{ paddingBottom: 14 }}>
         <h2>Coverage summary</h2>
         <p className="sub">
-          Match grain: {summary.match_grain} · Time grain: {summary.time_grain}
+          Match grain: {summary.match_grain} | Time grain: {summary.time_grain}
         </p>
         <dl className="facts">
           <dt>Customer alignment</dt>
           <dd>
             {Object.entries(summary.customer_alignment)
-              .map(([c, d]) => `${c} → ${d}`)
-              .join("; ") || "—"}
+              .map(([c, d]) => `${c} to ${d}`)
+              .join("; ") || "-"}
           </dd>
           <dt>Market alignment</dt>
           <dd>
             {summary.market_rollup_mode
-              ? "All client markets rolled up to the Discover total (caveat applied)"
+              ? "All client markets rolled up to the Discover total with a caveat applied"
               : Object.entries(summary.market_alignment)
-                  .map(([c, d]) => `${c} → ${d}`)
-                  .join("; ") || "—"}
+                  .map(([c, d]) => `${c} to ${d}`)
+                  .join("; ") || "-"}
           </dd>
           {summary.unmapped_client_markets.length > 0 && (
             <>
@@ -73,8 +95,7 @@ export default function Step5Dashboard({ coverage, analysisId, onRestart }: Prop
                   ))}
                 </div>
                 <div className="muted small" style={{ marginTop: 4 }}>
-                  These client-specific regions have no NIQ market mapping yet; their
-                  rows are flagged market_mismatch.
+                  These client-specific regions have no NIQ market mapping yet. Their rows are flagged market_mismatch.
                 </div>
               </dd>
             </>

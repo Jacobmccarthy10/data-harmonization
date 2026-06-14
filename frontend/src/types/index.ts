@@ -238,9 +238,84 @@ export interface CoverageResponse {
     brand_diagnostic: BrandDiagRow[];
     period_diagnostic: PeriodDiagRow[];
     brand_alias_map: Record<string, string>;
+    upc_crosswalk_entries?: number;
+    geo_rollup_map?: Record<string, string>;
   };
   kpis: CoverageKpis;
   trend: TrendPoint[];
   exceptions: ExceptionRow[];
   drilldown: DrilldownRow[];
+}
+
+export type MappingGraphNodeType =
+  | "client_field"
+  | "interpreted_meaning"
+  | "niq_field"
+  | "rule"
+  | "exception";
+
+export type MappingGraphBusinessArea =
+  | "product"
+  | "geography"
+  | "time"
+  | "metrics"
+  | "exceptions";
+
+export type MappingGraphConfidenceBand =
+  | "high"
+  | "medium"
+  | "low"
+  | "needs_review"
+  | "none";
+
+export interface MappingGraphNode {
+  id: string;
+  label: string;
+  type: MappingGraphNodeType;
+  businessArea: MappingGraphBusinessArea;
+  confidence?: number | null;
+  confidenceBand?: MappingGraphConfidenceBand;
+  description?: string;
+  details?: Record<string, string | number | boolean | null | string[]>;
+  severity?: "info" | "warning" | "critical";
+  position?: { x: number; y: number };
+}
+
+export interface MappingGraphEdge {
+  id: string;
+  source: string;
+  target: string;
+  label?: string;
+  relationship?: string;
+  confidence?: number | null;
+  confidenceBand?: MappingGraphConfidenceBand;
+}
+
+export interface MappingGraphException {
+  id: string;
+  title: string;
+  businessArea: MappingGraphBusinessArea;
+  severity: "info" | "warning" | "critical";
+  rows?: number;
+  note?: string | null;
+  linkedNodeId?: string;
+}
+
+export interface MappingGraphData {
+  title: string;
+  subtitle: string;
+  source: "structure" | "coverage";
+  nodes: MappingGraphNode[];
+  edges: MappingGraphEdge[];
+  exceptions: MappingGraphException[];
+  stats: {
+    clientFields: number;
+    niqFields: number;
+    rules: number;
+    exceptions: number;
+    highConfidence: number;
+    mediumConfidence: number;
+    lowConfidence: number;
+    needsReview: number;
+  };
 }
